@@ -63,13 +63,24 @@
 **默认快捷键：**
 
 - Ctrl + R 运行
+
 - Ctrl + B 编译
+
 - Ctrl + F 查找
+
 - F1 帮助文档
+
 - Ctrl + 滚轮  字体缩放
+
 - Crrl + I 自动对齐
+
 - Ctrl + Shift + 上下 整行移动
+
 - F4 同名之间的 .h .cpp 切换
+
+- Alt + 回车：调出在 .cpp 中添加定义窗口
+
+    ![image-20241124190143627](doc/img/image-20241124190143627.png)
 
 
 
@@ -3369,6 +3380,54 @@ void Widget::paintEvent(QPaintEvent *)
     // 启动定时器，每0.1秒更新一次
     timer->start(100);
     ```
+
+
+
+## 为窗口添加背景图
+
+为窗口添加背景图其原理就是利用重写 `void paintEvent(QPaintEvent* event)` 绘图事件（回调函数），当窗口刷新的时候自动进行调用。假如我们要为登录窗口添加背景图，效果如下：
+
+
+
+1. 在 `.h` 中添加绘图事件
+
+    ```cpp
+    class Login : public QDialog
+    {
+        Q_OBJECT
+    
+    public:
+        ...
+    
+    protected:
+        /* 绘图事件函数 */
+        void paintEvent(QPaintEvent* event) override;
+    
+    private:
+        ...
+    };
+    ```
+
+    
+
+2. 然后重写绘图事件
+
+    ```cpp
+    /** 绘图事件函数（这是一个回调函数，每当窗口刷新的时候自动调用）：给窗口添加背景图
+     * @brief Login::paintEvent
+     * @param event
+     */
+    void Login::paintEvent(QPaintEvent *event)
+    {
+        QPainter painter(this);
+        QPixmap pixmap(":/img/background-blud-prink.jpg");
+        painter.drawPixmap(0, 0, this->width(), this->height(), pixmap);
+    }
+    ```
+
+    
+
+
 
 # 文件读写
 
