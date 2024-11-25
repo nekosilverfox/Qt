@@ -44,7 +44,7 @@
 | [045_UDP_Demo](https://github.com/NekoSilverFox/Qt/tree/main/045_UDP_Demo) | UDP 通讯小案例（UDP 套接字的使用）                           |
 | [047_QTcpFile](https://github.com/NekoSilverFox/Qt/tree/main/047_QTcpFile) | 传输文件案例（TCP 套接字的使用）                             |
 | [050_MySelfQQ](https://github.com/NekoSilverFox/Qt/tree/main/050_MySelfQQ) | 实现类似 QQ 的聊天软件                                       |
-|                                                              |                                                              |
+| [042_Json_read_write](https://github.com/nekosilverfox/Qt/tree/main/042_Json_read_write) | 读写 JSON                                                    |
 | [070_QChartView_2D_Plot](https://github.com/NekoSilverFox/Qt/tree/main/070_QChartView_2D_Plot) | 借助 Qt 的 ChartView 绘制动态 2D 折线图                      |
 
 
@@ -68,7 +68,7 @@
 
 - Ctrl + F 查找
 
-- F1 帮助文档
+- 选中后按 F1 打开对应帮助文档
 
 - Ctrl + 滚轮  字体缩放
 
@@ -1576,7 +1576,7 @@ ActiveX控件是一种可重用的二进制组件，用于在**Windows操作系�
 
     <img src="doc/pic/README/image-20221203163133452.png" alt="image-20221203163133452" style="zoom:50%;" />
 
-3. 如果是自己封装小控件，选择 Widget 就足够了
+3. 如果是自己封装小控件，选择 Widget 或者 Dialog 就足够了
 
     <img src="doc/pic/README/image-20221203163227138.png" alt="image-20221203163227138" style="zoom:50%;" />
     <img src="doc/pic/README/image-20221203163338502.png" alt="image-20221203163338502" style="zoom:50%;" />
@@ -1665,11 +1665,10 @@ ActiveX控件是一种可重用的二进制组件，用于在**Windows操作系�
         return ui->spinBox->value();
     }
     ```
-
-
+    
     在主窗口中使用自定义接口：
     
-    ```c++
+    ```cpp
     Widget::Widget(QWidget *parent)
         : QWidget(parent)
         , ui(new Ui::Widget)
@@ -3385,9 +3384,13 @@ void Widget::paintEvent(QPaintEvent *)
 
 ## 为窗口添加背景图
 
-为窗口添加背景图其原理就是利用重写 `void paintEvent(QPaintEvent* event)` 绘图事件（回调函数），当窗口刷新的时候自动进行调用。假如我们要为登录窗口添加背景图，效果如下：
+> 项目代码：
+>
+> https://github.com/nekosilverfox/foxcloud/blob/main/client/login.cpp
 
+为窗口添加背景图其原理就是利用重写 `void paintEvent(QPaintEvent* event)` 绘图事件（回调函数），当窗口刷新的时候自动进行调用加载一张图片到背景。假如我们要为登录窗口添加背景图，效果如下：
 
+![iShot_2024-11-24_20.20.56](doc/img/iShot_2024-11-24_20.20.56.jpg)
 
 1. 在 `.h` 中添加绘图事件
 
@@ -3419,7 +3422,7 @@ void Widget::paintEvent(QPaintEvent *)
      */
     void Login::paintEvent(QPaintEvent *event)
     {
-        QPainter painter(this);
+        QPainter painter(this);  // this 代表绘制到当前Login整个窗口（也就是绘图设备/画板）
         QPixmap pixmap(":/img/background-blud-prink.jpg");
         painter.drawPixmap(0, 0, this->width(), this->height(), pixmap);
     }
@@ -3431,7 +3434,158 @@ void Widget::paintEvent(QPaintEvent *)
 
 # 文件读写
 
-#TODO
+
+
+# 操作 JSON
+
+> 项目地址：https://github.com/nekosilverfox/Qt/tree/main/042_Json_read_write
+
+操作 JSON 需要以下头文件
+
+```cpp
+/* Json 对应头文件 */
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QJsonValue>
+```
+
+
+
+## 写 JSON 到文件
+
+1. 假如我们需要构建以下创建 JSON 对象
+
+    ```json
+    {
+        "server":
+        {
+            "ip": "127.0.0.1",
+            "port": "8080"
+        }
+    }
+    ```
+
+    由于 JSON 是由键值对（Key-Value）的形式存储，所以我们需要从内到外构建Json对象
+
+2. 构建 JSON 对象
+
+    ```cpp
+    QJsonObject jsonSub;
+    jsonSub.insert("ip", QJsonValue("127.0.0.1"));
+    jsonSub.insert("port", QJsonValue("8080"));
+    
+    QJsonObject jsonObj;
+    jsonObj.insert("server", jsonSub);
+    ```
+
+    
+
+3. 将 JSON 写入到文件
+
+    ```cpp
+    /* 将 JSON 写入到文件
+     *      1. 数据转换为 JsonDocument
+     *      2. JsonDocument.toJson(); 转换为 QByteArray 二进制
+     *      3. 写入文件
+     */
+    QJsonDocument jsonDoc(jsonObj);
+    QByteArray jsonData = jsonDoc.toJson();
+    
+    QFile file("/Users/fox/雪狸的文件/Programma/Qt/042_Json_read_write/output.json");
+    file.open(QIODeviceBase::WriteOnly);
+    file.write(jsonData);
+    file.close();
+    ```
+
+
+
+## 读取 JSON 文件
+
+假如我们读取以下 JSON 对象
+
+```json
+{
+    "server":
+    {
+        "ip": "127.0.0.1",
+        "port": "8080"
+    },
+
+    "user":
+    {
+        "name": "fox",
+        "age": "17"
+    }
+}
+```
+
+
+
+1. 读文件为 QByteArray
+
+    ```cpp
+    QFile file("/Users/fox/雪狸的文件/Programma/Qt/042_Json_read_write/input.json");
+    file.open(QIODevice::ReadOnly);
+    QByteArray jsonData = file.readAll();
+    file.close();
+    ```
+
+    
+
+2. 使用 QJsonDocument 加载 JSON 对象 并 检查是否为有效的 JSON 文档
+
+    ```cpp
+    QJsonDocument jsonDoc = QJsonDocument::fromJson(jsonData);
+    if (jsonDoc.isNull() || !jsonDoc.isObject())
+    {
+        qDebug() << "Invalid JSON format!";
+        return;
+    }
+    ```
+
+    
+
+3. 获取根对象
+
+    ```cpp
+    QJsonObject rootObj = jsonDoc.object();
+    ```
+
+    
+
+4. 提取 "server" 和 "user" 对象
+
+    ```cpp
+    /* 4. 提取 "server" 对象
+     * 其中，rootObj.contains("server") - 如果指定对象包含 "server" 则返回 true
+     */
+    if (rootObj.contains("server") && rootObj["server"].isObject())
+    {
+        QJsonObject objServer = rootObj["server"].toObject();
+    
+        /* 提取 "ip" 和 "port" 字段 */
+        QString ip = objServer.value("ip").toString();
+        QString port = objServer.value("port").toString();
+    
+        qDebug() << "Server IP:" << ip;
+        qDebug() << "Server Port:" << port;
+    }
+    
+    /* 4. 提取 "user" 对象 */
+    if (rootObj.contains("user") && rootObj["user"].isObject())
+    {
+        QJsonObject objServer = rootObj["user"].toObject();
+    
+        /* 提取 "name" 和 "age" 字段 */
+        QString name = objServer.value("name").toString();
+        QString age = objServer.value("age").toString();
+    
+        qDebug() << "User name:" << name;
+        qDebug() << "User age:" << age;
+    }
+    ```
+
+    
 
 
 
@@ -3440,6 +3594,8 @@ void Widget::paintEvent(QPaintEvent *)
 > 本案例中使用 PostgreSQL 作为示例
 >
 > https://doc.qt.io/qt-6/qsqldatabase.html
+>
+> 如果缺少qpsql驱动可以参照以下方法解决：
 >
 > https://ru.stackoverflow.com/questions/1478871/qpsql-driver-not-found
 
