@@ -3601,7 +3601,38 @@ void Widget::paintEvent(QPaintEvent *)
 
 
 
+# 使用 http 协议通信
 
+在 Qt 中使用 HTTP 协议进行通信的话需要使用 3 个类：
+
+`QNetworkAccessManager` - Network Access API 都是围绕着一个`QNetworkAccessManager`对象构造
+
+的，这个对象**包含着发送请求的一些通用配置和设置**。它**包含着代理和缓存的配置**，以及和这些事物相关的一些信号，并且应答信号可以作为我们检测一个网络操作的进度
+
+- `QNetworkAccessManager` 类允许应用程序**发送**网络请求和接收网络应答
+- 一旦一个QNetworkAccessManager对象被创建了，那么应用程序就可以使用它在网络上发送请求。它提供了一组标准的函数，可以承载网络请求和一些可选的数据，并且**每一个请求返回一个`QNetworkReply`对象，该返回的对象包含着返回的请求应带的所有数据**
+- QNetworkAccessManager 将会把它受到的请求排队。并行执行的请求数量是依赖于协议的
+- 请求头可以创建 GET 或者 POST 协议
+- 目前，对于桌面平台的HTTP协议，对于一个主机/端口的组合，可6个请求并行执行。
+
+
+
+`QNetworkRequest` 类 - Network Access API 的一部分，并且这个类包含着在网络上发送请求的必要信息：
+
+- 它包含了一个URL和一些可以用来修改请求的附加信息
+- 我们在使用的时候需要将发送的http请求协议初始化到该类中：**请求头、数据、URL**
+
+
+
+`QNetworkReply` 类 - 它是 `QNetworkAccessManager` 返回的一个对象, 请求完成之后, 需要删除该对象
+
+- 通过该对象, 读 server 返回的数据
+- 通过信号 `readyRead()` 读取
+- 通过信号 `finished()` 结束读取
+
+
+
+**使用 HTTP 协议通信的时候需要在 `.pro` 文件中添加 `QT += network` 模块**
 
 # 测试
 
