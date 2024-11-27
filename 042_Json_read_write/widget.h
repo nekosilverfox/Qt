@@ -18,6 +18,11 @@ public:
     Widget(QWidget *parent = nullptr);
     ~Widget();
 
+    void writeJsonFile();
+    void readJsonFile();
+    void rewriteJsonValueFromFile();
+
+
 private:
     Ui::Widget *ui;
 };

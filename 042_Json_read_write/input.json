@@ -1,13 +1,10 @@
 {
-    "server":
-    {
+    "server": {
         "ip": "127.0.0.1",
         "port": "8080"
     },
-
-    "user":
-    {
-        "name": "fox",
-        "age": "17"
+    "user": {
+        "age": "2",
+        "name": "silverfox"
     }
 }

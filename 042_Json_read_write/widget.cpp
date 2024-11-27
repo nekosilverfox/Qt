@@ -14,7 +14,19 @@ Widget::Widget(QWidget *parent)
 {
     ui->setupUi(this);
 
-#if 0
+    rewriteJsonValueFromFile();
+}
+
+Widget::~Widget()
+{
+    delete ui;
+}
+
+/**
+ * @brief Widget::writeJsonFile 测试将 JSON 构建并写入文件
+ */
+void Widget::writeJsonFile()
+{
     /* 1. 假如我们需要构建以下创建 JSON 对象
      * {
      *      "server": {
@@ -44,8 +56,14 @@ Widget::Widget(QWidget *parent)
     file.open(QIODeviceBase::WriteOnly);
     file.write(jsonData);
     file.close();
+}
 
-#else
+
+/**
+ * @brief Widget::readJsonFile 从文件中读取 JSON
+ */
+void Widget::readJsonFile()
+{
     /* 1. 假如我们读取以下 JSON 对象
      * {
      *      "server": {
@@ -99,11 +117,72 @@ Widget::Widget(QWidget *parent)
         qDebug() << "User name:" << name;
         qDebug() << "User age:" << age;
     }
-
-#endif
 }
 
-Widget::~Widget()
+/**
+ * @brief Widget::rewriteJsonValueFromFile 修改 JSON 文件中某个 key 的 value
+            {
+                "server":
+                {
+                    "ip": "127.0.0.1",
+                    "port": "8080"
+                },
+
+                "user":
+                {
+                    "name": "fox",
+                    "age": "17"
+                }
+            }
+ */
+void Widget::rewriteJsonValueFromFile()
 {
-    delete ui;
+    QFile file("/Users/fox/雪狸的文件/Programma/Qt/042_Json_read_write/input.json");
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+    {
+        qWarning() << "Can not open file";
+        return;
+    }
+
+    // 读取文件内容
+    QByteArray fileData = file.readAll();
+    file.close();
+
+    // 解析 JSON
+    QJsonDocument doc = QJsonDocument::fromJson(fileData);
+    if (doc.isNull() || !doc.isObject())
+    {
+        qWarning() << "Invalid JSON file";
+        return;
+    }
+
+    // 获取根对象
+    QJsonObject rootObj = doc.object();
+
+    // 这里我们修改 user 的 name
+    if (!rootObj.contains("user") || !rootObj["user"].isObject())
+    {
+        qWarning() << "JSON does not contain 'login' object";
+        return;
+    }
+
+    // 更新 user 的值
+    QJsonObject userObj = rootObj["user"].toObject();
+    userObj["name"] = "silverfox";
+    userObj["age"] = QString::number(userObj["age"].toInt() + 1);
+
+    // 更新根对象
+    rootObj["user"] = userObj;
+
+    // 写回 JSON 文件
+    doc.setObject(rootObj);
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
+    {
+        qWarning() <<"Can not open file";
+        return;
+    }
+
+    file.write(doc.toJson(QJsonDocument::Indented));
+    file.close();
+
 }
