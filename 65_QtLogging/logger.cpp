@@ -30,7 +30,9 @@ void Logger::init(const QString &path, const QString &date, const QString &sep)
 
     _logFile = new QFile;
     _logFile->setFileName(path);
-    if (!_logFile->open(QIODevice::Append | QIODevice::Text)) qDebug() << "[ERROR] Can not open file " << _logFile->errorString();
+    if (!_logFile->open(QIODevice::Append | QIODevice::Text))
+        qDebug() << "[ERROR] Can not open file " << _logFile->errorString();
+
     _logFile->resize(0);  // 将文件的大小调整为0字节。如果 _logFile 已经关联到一个实际的文件，这会导致该文件的内容被清空，即删除所有已写入的数据
 
     // 自定义日志消息的处理方式，比如将日志发送到网络或格式化输出，这里告诉 Qt 所有log将使用我们的自定义函数处理
